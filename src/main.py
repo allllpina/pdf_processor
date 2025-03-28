@@ -2,7 +2,7 @@ import os
 import shutil
 
 from fastapi import FastAPI, HTTPException, File, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 from parser.pdf_text_parse import PdfParseText
 from composer.pdf_composer import PDF_composer
@@ -24,6 +24,45 @@ try:
 except Exception as e:
     # Обробка помилок при ініціалізації
     raise RuntimeError({"error": f"Error initialisation service: {str(e)}"})
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>API Home</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                flex-direction: column;
+            }
+            button {
+                font-size: 20px;
+                padding: 10px 20px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>PDF processing API</h1>
+        <button onclick="window.location.href='/docs'">Test API</button>
+    </body>
+    </html>
+    """
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
