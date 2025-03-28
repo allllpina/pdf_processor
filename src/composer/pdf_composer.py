@@ -18,9 +18,9 @@ class PDF_composer:
     ):
         """Функція, що перетворює масив із рядками тексту у повноцінний PDF-файл.
         filename: str - назва для новоствореного файлу
-        title str - заголовок для файлу
+        title: str - заголовок для файлу
         font_size: int - розмір шрифту,
-        text_lines: list[str] = масив із рядками тексту, що мають бути записані до файлу"""
+        text_lines: list[str] - масив із рядками тексту, що мають бути записані до файлу"""
         try:
             if text_lines is None or not isinstance(text_lines, list):
                 raise ValueError("Text lines must be a non-empty list of strings")

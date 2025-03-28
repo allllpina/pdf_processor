@@ -80,3 +80,24 @@ Empty
   ]
 }
 ```
+
+### /create_pdf_from_text (POST)
+__filename__ - назва для новоствореного файлу
+
+__title str__ - заголовок для файлу
+
+__font_size__ - розмір шрифту,
+
+__text_lines__ - масив із рядками тексту, що мають бути записані до файлу
+
+```
+{
+    filename: Optional[str]: "test.pdf"
+    title: Optional[str] = "test"
+    font_size: Optional[int] = 15
+    text_lines: list[str] = ['test1', 'test2', 'test3']
+}
+```
+
+#### Response
+- Returns the PDF-file for download
