@@ -1,3 +1,5 @@
 pdfV/
 .env
 __pycache__
+materials/pdf/
+materials/txt/
