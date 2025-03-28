@@ -1,13 +1,18 @@
 import os
 import shutil
+
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import FileResponse
+
 from parser.pdf_text_parse import PdfParseText
-from request_models import ParseText
+from composer.pdf_composer import PDF_composer
+
+from request_models import ParseText, CreatePdfFromText
 
 # Завантаження змінних середовища для конфігурації
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", './materials/pdf')
-RESULT_DIR = os.getenv("RESULT_DIR", "./materials/txt")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", './src/materials/pdf')
+RESULT_DIR = os.getenv("RESULT_DIR", "./src/materials/txt")
+CREATED = os.getenv("CREATED", "./src/materials/created")
 
 # Ініціалізація FastAPI додатку
 app = FastAPI()
@@ -15,6 +20,7 @@ app = FastAPI()
 try:
     # Створення об'єкта для парсингу pdf
     prs = PdfParseText()
+    pdf_cmpsr = PDF_composer(f"{CREATED}/")
 except Exception as e:
     # Обробка помилок при ініціалізації
     raise RuntimeError({"error": f"Error initialisation service: {str(e)}"})
@@ -93,3 +99,22 @@ async def get_content():
     except Exception as e:
         # Обробка помилок при виводі всіх слів
         raise HTTPException(status_code=500, detail={"error": f"Error while listing databases: {str(e)}"})
+    
+@app.post("/create_pdf_from_text")
+async def create_pdf_from_text(request: CreatePdfFromText):
+    try:
+        file_path = pdf_cmpsr.generate_pdf(
+            filename = request.filename,
+            title = request.title,
+            font_size = request.font_size,
+            text_lines = request.text_lines
+                                        )
+        if not os.path.exists(file_path):
+                raise {"error": f"File '{request.filename}' hasn't been created!"}
+        
+        result = FileResponse(file_path, media_type="application/pdf",filename= request.filename)
+
+        print(result)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail= {'error': f'Error while creating a file: {str(e)}'})
