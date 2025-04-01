@@ -8,6 +8,9 @@ COPY . /app
 # Встановлення залежностей з requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update && apt-get install -y fonts-dejavu
+
+
 # Встановлення змінних середовища для шляхи моделей
 ENV UPLOAD_DIR=/app/src/materials/pdf
 ENV RESULT_DIR=/app/src/materials/txt

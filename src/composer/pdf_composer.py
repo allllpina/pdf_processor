@@ -4,6 +4,12 @@ from reportlab.lib.utils import simpleSplit
 from datetime import datetime
 import os
 
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+pdfmetrics.registerFont(TTFont("DejaVu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
+
+
 class PDF_composer:
     def __init__(self, save_path: str):
         """save_path: str - шлях, за яким мають зберігатись всі новостворені PDF-файли"""
@@ -47,18 +53,18 @@ class PDF_composer:
             # Додаємо заголовок, якщо він є
             y_position = height - 50  # Відступ зверху
             if title:
-                pdf.setFont("Helvetica-Bold", font_size + 2)
+                pdf.setFont("DejaVu", font_size + 2)
                 pdf.drawString(50, y_position, title)
                 y_position -= 20  # Відступ після заголовка
             
             # Додаємо текст з автоматичним перенесенням рядків
-            pdf.setFont("Helvetica", font_size)
+            pdf.setFont("DejaVu", font_size)
             for line in text_lines:
-                wrapped_lines = simpleSplit(line, "Helvetica", font_size, max_width)
+                wrapped_lines = simpleSplit(line, "DejaVu", font_size, max_width)
                 for wrapped_line in wrapped_lines:
                     if y_position < 50:  # Перевіряємо, чи є місце на сторінці
                         pdf.showPage()
-                        pdf.setFont("Helvetica", font_size)
+                        pdf.setFont("DejaVu", font_size)
                         y_position = height - 50
                     pdf.drawString(50, y_position, wrapped_line)
                     y_position -= 15
