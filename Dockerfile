@@ -8,6 +8,7 @@ COPY . /app
 # Встановлення залежностей з requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Встановлення шрифтів
 RUN apt-get update && apt-get install -y fonts-dejavu
 
 
