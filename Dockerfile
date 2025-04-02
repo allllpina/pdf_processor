@@ -11,6 +11,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Встановлення шрифтів
 RUN apt-get update && apt-get install -y fonts-dejavu
 
+# Tesseract
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-ukr \
+    libtesseract-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Встановлення змінних середовища для шляхи моделей
 ENV UPLOAD_DIR=/app/src/materials/pdf

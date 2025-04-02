@@ -3,12 +3,12 @@ import PyPDF2
 
 class PdfParseText:
     @staticmethod
-    def parse_text_pdf(file_path):
+    def parse_text_pdf(file_path, output_path):
         try:
             file_name = os.path.splitext(os.path.basename(file_path))[0]
             with open(file_path, 'rb') as file:
                 reader = PyPDF2.PdfReader(file)
-                with open(f'materials/txt/{file_name}.txt', 'w', encoding='utf-8') as txt_file:
+                with open(f'{output_path}/{file_name}.txt', 'w', encoding='utf-8') as txt_file:
                     for page in reader.pages:
                         text = page.extract_text()
                         if text:

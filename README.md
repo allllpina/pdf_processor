@@ -31,7 +31,7 @@ __file__ - The PDF file to be uploaded
 }
 ```
 
-### /process_file (POST)
+### /process_pdf_text (POST)
 #### Body
 __file_name__ - Name of the file to process
 ```
@@ -45,6 +45,18 @@ __file_name__ - Name of the file to process
   "message": "File example.pdf successfully parsed!"
 }
 ```
+
+### /process_pdf_ocr (POST)
+#### Body
+__file_name__ - Name of the file to process
+```
+{
+  "filename": "example.pdf",
+}
+```
+#### Response
+Returns the requested JSON file for download
+
 
 ### /export_text (GET)
 #### Parameters

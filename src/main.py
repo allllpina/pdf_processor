@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 
 from parser.pdf_text_parse import PdfParseText
+from parser.pdf_text_parse_ocr import PDF_parse_text_OCR
 from composer.pdf_composer import PDF_composer
 
 from request_models import ParseText, CreatePdfFromText
@@ -20,6 +21,7 @@ app = FastAPI()
 try:
     # Створення об'єкта для парсингу pdf
     prs = PdfParseText()
+    prs_ocr = PDF_parse_text_OCR(RESULT_DIR)
     pdf_cmpsr = PDF_composer(f"{CREATED}/")
 except Exception as e:
     # Обробка помилок при ініціалізації
@@ -79,15 +81,15 @@ async def upload_pdf(file: UploadFile = File(...)):
         # Обробка помилок при завантаженні файлу
         raise HTTPException(status_code=500, detail={"error": f"Error while scanning text: {str(e)}"})
 
-@app.post("/process_file")
-async def process_file(request: ParseText):
+@app.post("/process_pdf_text")
+async def process_pdf_text(request: ParseText):
     try:
         # Перевірка існування файлу
         if request.file_name and not os.path.exists(f'{UPLOAD_DIR}/{request.file_name}'):
             return {"error": f"File '{request.file_name}' does not exist!"}
 
         # Парсинг файлу
-        result = prs.parse_text_pdf(f'{UPLOAD_DIR}/{request.file_name}')
+        result = prs.parse_text_pdf(f'{UPLOAD_DIR}/{request.file_name}', RESULT_DIR)
 
         print(result)  # Виведення результату в консоль для налагодження
         return result  # Повернення результату клієнту
@@ -95,12 +97,31 @@ async def process_file(request: ParseText):
         # Обробка помилок при скануванні тексту
         raise HTTPException(status_code=500, detail={"error": f"Error while scanning text: {str(e)}"})
 
+@app.post("/process_pdf_ocr")
+async def process_pdf_ocr(request: ParseText):
+    try:
+        if request.file_name and not os.path.exists(f'{UPLOAD_DIR}/{request.file_name}'):
+            raise {"error": f"File '{request.file_name}' does not exist!"}
+        
+        file_path, filename = prs_ocr.scan_text(f'{UPLOAD_DIR}/{request.file_name}')
+        print(file_path)
+
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=500, detail={"error": f"Error while scanning text: {str(e)}"})
+
+        result = FileResponse(file_path, media_type="application/json",filename = filename)
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"error": f"Error while scanning text: {str(e)}"})
+
+
 @app.get("/export_text")
 async def export_text(file_name: str):
     try:
         # Перевірка існування файлу
         if file_name and not os.path.exists(f'{RESULT_DIR}/{file_name}'):
-            return {"error": f"File '{file_name}' does not exist!"}
+            raise {"error": f"File '{file_name}' does not exist!"}
 
         with open(f'{RESULT_DIR}/{file_name}', "r", encoding="utf-8") as file:
             file_content = file.read()
@@ -116,12 +137,14 @@ async def export_text(file_name: str):
 @app.get("/export_file")
 async def export_file(file_name: str):
     try:
-        # Перевірка існування файлу
-        if file_name and not os.path.exists(f'{RESULT_DIR}/{file_name}'):
-            return {"error": f"File '{file_name}' does not exist!"}
+        if file_name.endswith(".txt"):
+            # Перевірка існування файлу
+            if file_name and not os.path.exists(f'{RESULT_DIR}/{file_name}'):
+                return {"error": f"File '{file_name}' does not exist!"}
 
-        result = FileResponse(f'{RESULT_DIR}/{file_name}', media_type="text/plain", filename="result.txt")
-
+            result = FileResponse(f'{RESULT_DIR}/{file_name}', media_type="text/plain", filename="result.txt")
+        else:
+            result = FileResponse(f'{RESULT_DIR}/{file_name}', media_type="application/json", filename="result.")
         print(result)  # Виведення результату в консоль для налагодження
         return result  # Повернення результату клієнту
     except Exception as e:
